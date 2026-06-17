@@ -1,0 +1,26 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* Custom utility classes for the redesign */
+@layer components {
+  .nav-link {
+    @apply text-slate-600 hover:text-primary font-medium transition-colors;
+  }
+
+  .btn-primary {
+    @apply bg-primary hover:bg-blue-700 text-white px-6 py-2 rounded-lg font-medium transition-colors;
+  }
+
+  .btn-secondary {
+    @apply bg-slate-100 hover:bg-slate-200 text-slate-700 px-6 py-2 rounded-lg font-medium transition-colors;
+  }
+
+  .card {
+    @apply bg-white rounded-2xl border border-slate-200 p-6 hover:shadow-md transition-shadow;
+  }
+
+  .input-field {
+    @apply w-full px-4 py-3 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent placeholder-slate-400;
+  }
+}
