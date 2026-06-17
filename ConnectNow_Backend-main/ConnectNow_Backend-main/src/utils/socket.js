@@ -13,7 +13,7 @@ const initializeSocket = (server) => {
     cors: {
       origin: [
         process.env.CLIENT_URL || "http://localhost:5173",
-        "https://connect-now-frontend.vercel.app",
+        "https://connectnowchat-app-2d03kdeq5-sowmya-s-projects7.vercel.app",
       ],
       credentials: true,
       methods: ["GET", "POST"],
