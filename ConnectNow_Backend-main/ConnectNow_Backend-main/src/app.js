@@ -10,7 +10,7 @@ app.use(
   cors({
     origin: [
       process.env.CLIENT_URL || "http://localhost:5173",
-      "https://connect-now-frontend.vercel.app",
+      "https://connectnowchat-app-new.vercel.app",
     ],
     credentials: true,
   })
@@ -44,3 +44,7 @@ connectDb()
   .catch((err) => {
     console.log("Error:", err.message);
   });
+
+  app.get("/", (req, res) => {
+    res.send("Backend is running 🚀");
+});
