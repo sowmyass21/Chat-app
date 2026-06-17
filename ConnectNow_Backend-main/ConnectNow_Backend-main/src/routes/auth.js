@@ -1,5 +1,104 @@
 const express = require("express");
 const authRouter = express.Router();
+const bcrypt = require("bcrypt");
+
+const { validateSignUpData } = require("../utils/validations");
+const userModel = require("../model/user");
+
+authRouter.post("/signup", async (req, res) => {
+  try {
+    const data = validateSignUpData(req);
+    const { firstName, lastName, email, password } = data;
+
+    const existingUser = await userModel.findOne({ email });
+    if (existingUser) {
+      return res.status(400).send("User already exists");
+    }
+
+    const passwordHash = await bcrypt.hash(password, 10);
+
+    const user = new userModel({
+      firstName,
+      lastName,
+      email,
+      password: passwordHash,
+    });
+
+    await user.save();
+    return res.status(201).send("User created successfully");
+  } catch (err) {
+    console.error("Error Detected:", err.message);
+    return res.status(500).send("Error: " + err.message);
+  }
+});
+
+authRouter.post("/login", async (req, res) => {
+  try {
+    const { email, password } = req.body;
+
+    if (!email || !password) {
+      return res.status(400).send("Email and password are required.");
+    }
+
+    const user = await userModel.findOne({ email });
+    if (!user) {
+      return res.status(401).send("Invalid credentials");
+    }
+
+    const isPasswordValid = await user.validatePassword(password);
+    if (!isPasswordValid) {
+      return res.status(401).send("Invalid credentials");
+    }
+
+    const token = await user.getJWT();
+    const origin = req.headers.origin || "";
+    const isLocal = /localhost|127\.0\.0\.1/.test(origin);
+    const isProd = !isLocal;
+
+    res.cookie("token", token, {
+      httpOnly: true,
+      secure: isProd,
+      sameSite: isProd ? "None" : "Lax",
+      expires: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000),
+    });
+
+    return res.status(200).json({
+      message: "Login successful",
+      user: {
+        _id: user._id,
+        firstName: user.firstName,
+        lastName: user.lastName,
+        email: user.email,
+      },
+    });
+  } catch (err) {
+    return res.status(500).send("Error: " + err.message);
+  }
+});
+
+authRouter.post("/logout", async (req, res) => {
+  try {
+    const origin = req.headers.origin || "";
+    const isLocal = /localhost|127\.0\.0\.1/.test(origin);
+    const isProd = !isLocal;
+
+    res.cookie("token", "", {
+      httpOnly: true,
+      secure: isProd,
+      sameSite: isProd ? "None" : "Lax",
+      expires: new Date(0),
+    });
+
+    return res.status(200).send("Logout successfully");
+  } catch (err) {
+    return res.status(500).send("Error: " + err.message);
+  }
+});
+
+module.exports = authRouter;
+
+/*const express = require("express");
+const authRouter = express.Router();
 
 const { validateSignUpData } = require("../utils/validations");
 const userModel = require("../model/user");
@@ -75,4 +174,4 @@ authRouter.post("/logout", async (req, res) => {
     res.send("Error:" + err.message);
   }
 });
-module.exports = authRouter;
+module.exports = authRouter;*/
